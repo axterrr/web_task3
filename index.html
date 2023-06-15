@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy list</title>
+    <link rel="stylesheet" type="text/css" href="main.css" />
+</head>
+<body>
+	<main>
+		<div class="menu">
+			<div class="add">
+				<input class="add-input" type="text" placeholder="Goods name">
+				<button class="add-button" data-tooltip="Add goods">Add</button>
+			</div>
+			<hr>
+
+			<div class="goods">
+				<span class="goods-name">Tomatoes</span>
+
+				<div class="amount">
+					<button class="amount-minus" data-tooltip="Reduce">-</button>
+					<span class="amount-number">2</span>
+					<button class="amount-plus" data-tooltip="Increase">+</button>
+				</div>
+
+				<div class="buttons">
+					<button class="bought-button" data-tooltip="Buy">Bought</button>
+					<button class="bought-cancel" data-tooltip="Cancel">X</button>
+				</div>
+			</div>
+			<hr>
+
+			<div class="goods">
+				<span class="goods-name">Cookies</span>
+
+				<div class="amount">
+					<button class="amount-minus" data-tooltip="Reduce">-</button>
+					<span class="amount-number">2</span>
+					<button class="amount-plus" data-tooltip="Increase">+</button>
+				</div>
+
+				<div class="buttons">
+					<button class="bought-button" data-tooltip="Buy">Bought</button>
+					<button class="bought-cancel" data-tooltip="Cancel">X</button>
+				</div>
+			</div>
+			<hr>
+
+			<div class="goods">
+				<span class="goods-name">Cheese</span>
+
+				<div class="amount">
+					<button class="amount-minus" data-tooltip="Reduce">-</button>
+					<span class="amount-number">1</span>
+					<button class="amount-plus" data-tooltip="Increase">+</button>
+				</div>
+
+				<div class="buttons">
+					<button class="bought-button" data-tooltip="Buy">Bought</button>
+					<button class="bought-cancel" data-tooltip="Cancel">X</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="info">
+			<div class="info-div-header">
+				<span class="info-header">Left</span>
+			</div>
+			<hr>
+
+			<div class="info-product">
+				<span class="product-item">
+					Cookies
+					<span class="item-amount">2</span>
+				</span>
+
+				<span class="product-item">
+					Cheese
+					<span class="item-amount">1</span>
+				</span>
+
+				<span class="product-item">
+					Tomatoes
+					<span class="item-amount">2</span>
+				</span>
+			</div>
+			<hr>
+
+			<div class="info-div-header">
+				<span class="info-header">Bought</span>
+			</div>
+			<hr>
+
+			<div class="info-product-bought">
+
+			</div>
+		</div>
+	</main>
+
+	<footer>
+		<div class="badge">
+			<div class="buy-list">
+				<span>Buy List</span>
+			</div>
+
+			<div class="author">
+				<span>Created by:</span>
+			</div>
+
+			<div class="name">
+				<span>Vladyslav Hibskyi</span>
+			</div>
+		</div>
+	</footer>
+
+	<script src="javascript.js"></script>
+</body>
+</html>
