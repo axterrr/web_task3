@@ -1,34 +1,25 @@
-let namesList = []
+let itemsList = [];
+let namesList = [];
+
+window.addEventListener('beforeunload', function (){
+    localStorage.setItem("data", JSON.stringify(itemsList));
+});
+
+window.addEventListener('load', function (){
+    //localStorage.clear();
+    const storedData = localStorage.getItem('data');
+    if (storedData) itemsList = JSON.parse(storedData);
+    else itemsList = [{name: "Tomatoes", amount: 2, bought: true},
+                      {name: "Cookies", amount: 2, bought: false},
+                      {name: "Cheese", amount: 1, bought: false}];
+    for (let i = 0; i < itemsList.length; i++)
+        addItem(itemsList[i]);
+});
 
 const addButton = document.getElementsByClassName("add-button")[0];
-addButton.addEventListener('click', addItem);
+addButton.addEventListener('click', add);
 
-const deleteButtons = document.getElementsByClassName("bought-cancel");
-for (let i = 0; i < deleteButtons.length; i++)
-    deleteButtons[i].addEventListener("click", deleteItem);
-
-const buyButtons = document.getElementsByClassName("bought-button");
-for (let i = 0; i < buyButtons.length; i++)
-    buyButtons[i].addEventListener("click", buyItem);
-
-const reduceButtons = document.getElementsByClassName("amount-minus");
-for (let i = 0; i < reduceButtons.length; i++) {
-    reduceButtons[i].addEventListener("click", reduceItem);
-    if(parseInt(reduceButtons[i].nextElementSibling.textContent) <= 1)
-        reduceButtons[i].disabled = true;
-}
-
-const increaseButtons = document.getElementsByClassName("amount-plus");
-for (let i = 0; i < increaseButtons.length; i++)
-    increaseButtons[i].addEventListener("click", increaseItem);
-
-const names = document.getElementsByClassName("goods-name");
-for (let i = 0; i < names.length; i++) {
-    namesList.push(names[i].textContent.toLowerCase());
-    names[i].addEventListener("click", changeName);
-}
-
-function addItem() {
+function add() {
     const addInput = document.getElementsByClassName("add-input")[0];
     const itemName = addInput.value;
 
@@ -37,46 +28,70 @@ function addItem() {
     } else if (itemName === '') {
         window.alert("Enter the name of the goods!");
     } else {
-        const newItem = document.createElement("div");
-        newItem.className = "goods";
-        newItem.innerHTML = `
-            <span class="goods-name">${itemName}</span>
-            <div class="amount">
-                <button class="amount-minus" data-tooltip="Reduce">-</button>
-                <span class="amount-number">1</span>
-                <button class="amount-plus" data-tooltip="Increase">+</button>
-            </div>
-            <div class="buttons">
-                <button class="bought-button" data-tooltip="Buy">Bought</button>
-                <button class="bought-cancel" data-tooltip="Cancel">X</button>
-            </div>
-        `;
-        newItem.getElementsByClassName("bought-cancel")[0].addEventListener("click", deleteItem);
-        newItem.getElementsByClassName("bought-button")[0].addEventListener("click", buyItem);
-        newItem.getElementsByClassName("goods-name")[0].addEventListener("click", changeName);
-        newItem.getElementsByClassName("amount-minus")[0].addEventListener("click", reduceItem);
-        newItem.getElementsByClassName("amount-plus")[0].addEventListener("click", increaseItem);
-        newItem.getElementsByClassName("amount-minus")[0].disabled = true;
-
-        const goodsList = document.getElementsByClassName("menu")[0];
-        const hr = document.createElement("hr");
-        goodsList.appendChild(hr);
-        goodsList.appendChild(newItem);
-
-        const infoItem = document.createElement("span");
-        infoItem.className = "product-item";
-        infoItem.innerHTML = `
-            ${itemName}
-            <span class="item-amount">1</span>
-        `;
-        const leftList = document.getElementsByClassName("info-product")[0];
-        leftList.appendChild(infoItem);
-
-        namesList.push(itemName.toLowerCase());
+        const newItem = {
+            name: itemName,
+            amount: 1,
+            bought: false
+        };
+        addItem(newItem);
+        itemsList.push(newItem);
     }
 
     addInput.value = "";
     addInput.focus();
+}
+
+function addItem(item) {
+    const newItem = document.createElement("div");
+    newItem.className = "goods";
+    let tooltip = "Buy";
+    let button = "Bought";
+
+    if(item.bought) {
+        newItem.className = "goods bought";
+        tooltip = "Don't buy";
+        button = "Not bought";
+    }
+
+    newItem.innerHTML = `
+            <span class="goods-name">${item.name}</span>
+            <div class="amount">
+                <button class="amount-minus" data-tooltip="Reduce">-</button>
+                <span class="amount-number">${item.amount}</span>
+                <button class="amount-plus" data-tooltip="Increase">+</button>
+            </div>
+            <div class="buttons">
+                <button class="bought-button" data-tooltip="${tooltip}">${button}</button>
+                <button class="bought-cancel" data-tooltip="Cancel">X</button>
+            </div>
+        `;
+
+    newItem.getElementsByClassName("bought-cancel")[0].addEventListener("click", deleteItem);
+    if(!item.bought) newItem.getElementsByClassName("bought-button")[0].addEventListener("click", buyItem);
+    else newItem.getElementsByClassName("bought-button")[0].addEventListener("click", dontBuyItem);
+    newItem.getElementsByClassName("goods-name")[0].addEventListener("click", changeName);
+    newItem.getElementsByClassName("amount-minus")[0].addEventListener("click", reduceItem);
+    newItem.getElementsByClassName("amount-plus")[0].addEventListener("click", increaseItem);
+    if(item.amount === 1) newItem.getElementsByClassName("amount-minus")[0].disabled = true;
+    if(item.bought) newItem.getElementsByClassName("goods-name")[0].disabled = true;
+
+    const goodsList = document.getElementsByClassName("menu")[0];
+    const hr = document.createElement("hr");
+    goodsList.appendChild(hr);
+    goodsList.appendChild(newItem);
+
+    const infoItem = document.createElement("span");
+    infoItem.className = "product-item";
+    infoItem.innerHTML = `
+            ${item.name}
+            <span class="item-amount">${item.amount}</span>
+    `;
+    const leftList = document.getElementsByClassName("info-product")[0];
+    const boughtList = document.getElementsByClassName("info-product-bought")[0];
+    if(item.bought) boughtList.appendChild(infoItem);
+    else leftList.appendChild(infoItem);
+
+    namesList.push(item.name.toLowerCase());
 }
 
 function deleteItem(event) {
@@ -86,11 +101,16 @@ function deleteItem(event) {
     item.parentNode.removeChild(item);
 
     const itemName = item.getElementsByClassName("goods-name")[0].textContent;
+    const deleted = findProduct(itemName);
+    deleted.parentNode.removeChild(deleted);
+
     namesList = namesList.filter(function(value) {
         return value !== itemName.toLowerCase();
     });
-    const deleted = findProduct(itemName);
-    deleted.parentNode.removeChild(deleted);
+
+    itemsList = itemsList.filter(function(item) {
+        return item.name !== itemName;
+    });
 }
 
 function buyItem(event) {
@@ -100,27 +120,39 @@ function buyItem(event) {
     const item = button.parentNode.parentNode;
     item.className = "goods bought";
 
-    const deleted = findProduct(item.getElementsByClassName("goods-name")[0].textContent);
+    const itemName = item.getElementsByClassName("goods-name")[0].textContent
+    const deleted = findProduct(itemName);
     deleted.parentNode.removeChild(deleted);
     document.getElementsByClassName("info-product-bought")[0].appendChild(deleted);
 
     item.getElementsByClassName("goods-name")[0].disabled = true;
 
+    const index = itemsList.findIndex(item => item.name === itemName);
+    itemsList[index].bought = true;
+
     button.removeEventListener("click", buyItem);
-    button.addEventListener("click", function (){
-        button.textContent = "Bought";
-        button.setAttribute("data-tooltip", "Buy");
-        item.className = "goods";
+    button.addEventListener("click", dontBuyItem);
+}
 
-        const deleted = findProduct(item.getElementsByClassName("goods-name")[0].textContent);
-        deleted.parentNode.removeChild(deleted);
-        document.getElementsByClassName("info-product")[0].appendChild(deleted);
+function dontBuyItem(event) {
+    const button = event.target;
+    button.textContent = "Bought";
+    button.setAttribute("data-tooltip", "Buy");
+    const item = button.parentNode.parentNode;
+    item.className = "goods";
 
-        item.getElementsByClassName("goods-name")[0].disabled = false;
+    const itemName = item.getElementsByClassName("goods-name")[0].textContent;
+    const deleted = findProduct(itemName);
+    deleted.parentNode.removeChild(deleted);
+    document.getElementsByClassName("info-product")[0].appendChild(deleted);
 
-        button.removeEventListener("click", this);
-        button.addEventListener("click", buyItem);
-    });
+    item.getElementsByClassName("goods-name")[0].disabled = false;
+
+    const index = itemsList.findIndex(item => item.name === itemName);
+    itemsList[index].bought = false;
+
+    button.removeEventListener("click", dontBuyItem);
+    button.addEventListener("click", buyItem);
 }
 
 function reduceItem(event) {
@@ -130,35 +162,43 @@ function reduceItem(event) {
     if(newValue===1) button.disabled = true;
 
     const amountBlock = button.parentNode;
-    const changed = findProduct(amountBlock.previousElementSibling.textContent).getElementsByClassName("item-amount")[0];
+    const itemName = amountBlock.previousElementSibling.textContent;
+    const changed = findProduct(itemName).getElementsByClassName("item-amount")[0];
     changed.textContent = newValue.toString();
+
+    const index = itemsList.findIndex(item => item.name === itemName);
+    itemsList[index].amount = newValue;
 }
 
 function increaseItem(event) {
     const button = event.target;
-    const span = button.previousElementSibling;
-    const newValue = parseInt(span.textContent) + 1;
+    const newValue = parseInt(button.previousElementSibling.textContent) + 1;
     button.previousElementSibling.textContent = newValue.toString();
-    if(span.previousElementSibling.disabled) span.previousElementSibling.disabled = false;
+    button.previousElementSibling.previousElementSibling.disabled = false;
 
     const amountBlock = button.parentNode;
-    const changed = findProduct(amountBlock.previousElementSibling.textContent).getElementsByClassName("item-amount")[0];
+    const itemName = amountBlock.previousElementSibling.textContent;
+    const changed = findProduct(itemName).getElementsByClassName("item-amount")[0];
     changed.textContent = newValue.toString();
+
+    const index = itemsList.findIndex(item => item.name === itemName);
+    itemsList[index].amount = newValue;
 }
 
 function changeName(event) {
     const spam = event.target;
+    const previousName = spam.textContent;
 
     if(!spam.disabled) {
         const input = document.createElement('input');
         input.type = 'text';
-        input.value = spam.textContent;
+        input.value = previousName;
         input.className = "goods-input";
         spam.parentNode.replaceChild(input, spam);
         input.focus();
 
         namesList = namesList.filter(function (value) {
-            return value !== spam.textContent.toLowerCase();
+            return value !== previousName.toLowerCase();
         });
 
         input.addEventListener('blur', function () {
@@ -168,12 +208,16 @@ function changeName(event) {
             } else if (newName === '') {
                 window.alert("You haven't entered any text!");
             } else {
-                const changed = findProduct(spam.textContent);
-                changed.innerHTML = `
-                ${newName}
-                ${changed.firstElementChild.outerHTML}
-            `;
                 spam.textContent = newName;
+
+                const changed = findProduct(previousName);
+                changed.innerHTML = `
+                    ${newName}
+                    ${changed.firstElementChild.outerHTML}
+                `;
+
+                const index = itemsList.findIndex(item => item.name === previousName);
+                itemsList[index].name = newName;
             }
             namesList.push(spam.textContent.toLowerCase());
             input.parentNode.replaceChild(spam, input);
