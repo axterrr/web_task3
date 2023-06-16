@@ -82,10 +82,13 @@ function addItem(item) {
 
     const infoItem = document.createElement("span");
     infoItem.className = "product-item";
+    let className = "item-name";
+    if(item.bought) className = "item-name crossed";
     infoItem.innerHTML = `
-            ${item.name}
+            <span class="${className}">${item.name}</span>
             <span class="item-amount">${item.amount}</span>
     `;
+
     const leftList = document.getElementsByClassName("info-product")[0];
     const boughtList = document.getElementsByClassName("info-product-bought")[0];
     if(item.bought) boughtList.appendChild(infoItem);
@@ -122,6 +125,7 @@ function buyItem(event) {
 
     const itemName = item.getElementsByClassName("goods-name")[0].textContent
     const deleted = findProduct(itemName);
+    deleted.getElementsByClassName("item-name")[0].className = "item-name crossed";
     deleted.parentNode.removeChild(deleted);
     document.getElementsByClassName("info-product-bought")[0].appendChild(deleted);
 
@@ -143,6 +147,7 @@ function dontBuyItem(event) {
 
     const itemName = item.getElementsByClassName("goods-name")[0].textContent;
     const deleted = findProduct(itemName);
+    deleted.getElementsByClassName("item-name")[0].className = "item-name";
     deleted.parentNode.removeChild(deleted);
     document.getElementsByClassName("info-product")[0].appendChild(deleted);
 
@@ -210,11 +215,8 @@ function changeName(event) {
             } else {
                 spam.textContent = newName;
 
-                const changed = findProduct(previousName);
-                changed.innerHTML = `
-                    ${newName}
-                    ${changed.firstElementChild.outerHTML}
-                `;
+                const changed = findProduct(previousName).getElementsByClassName("item-name")[0];
+                changed.textContent = newName;
 
                 const index = itemsList.findIndex(item => item.name === previousName);
                 itemsList[index].name = newName;
@@ -226,24 +228,13 @@ function changeName(event) {
 }
 
 function findProduct(name) {
-    const spans1 = document.getElementsByClassName("info-product")[0].getElementsByClassName('product-item');
-    const spans2 = document.getElementsByClassName("info-product-bought")[0].getElementsByClassName('product-item');
+    const spans = document.getElementsByClassName("item-name");
 
-    for (let i = 0; i < spans1.length; i++) {
-        const span = spans1[i];
+    for (let i = 0; i < spans.length; i++) {
+        const span = spans[i];
         const text = span.textContent.trim();
 
-        if (text.indexOf(name+"\n") === 0) {
-            return span;
-        }
-    }
-
-    for (let i = 0; i < spans2.length; i++) {
-        const span = spans2[i];
-        const text = span.textContent.trim();
-
-        if (text.indexOf(name+"\n") === 0) {
-            return span;
-        }
+        if (name === text)
+            return span.parentElement;
     }
 }

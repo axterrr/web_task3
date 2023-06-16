@@ -189,6 +189,10 @@ input:focus {
     color: white;
 }
 
+.crossed {
+    text-decoration: line-through;
+}
+
 .badge {
     position: fixed;
     bottom: -55px;
